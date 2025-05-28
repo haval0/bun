@@ -1492,6 +1492,11 @@ pub fn writeFile(globalThis: *JSC.JSGlobalObject, callframe: *JSC.CallFrame) bun
         if (store.data == .bytes) {
             return globalThis.throwInvalidArguments("Cannot write to a Blob backed by bytes, which are always read-only", .{});
         }
+    } else {
+        // Raw path, check permissions
+        if (!permissions.checkFilePermission(path_or_blob.path.path.slice_with_underlying_string)) {
+            return globalThis.throw("No permission to write to path {}", .{path_or_blob.path.path.slice_with_underlying_string});
+        }
     }
 
     const data = args.nextEat() orelse {
@@ -1844,6 +1849,10 @@ pub fn constructBunFile(
     const options = if (arguments.len >= 2) arguments[1] else null;
 
     if (path == .path) {
+        // Check path permission
+        if (!permissions.checkFilePermission(path.path.slice_with_underlying_string)) {
+            return globalObject.throw("No permission to use file at path {}", .{path.path.slice_with_underlying_string});
+        }
         if (strings.hasPrefixComptime(path.path.slice(), "s3://")) {
             return try S3File.constructInternalJS(globalObject, path.path, options);
         }
@@ -4743,3 +4752,4 @@ const PathOrBlob = JSC.Node.PathOrBlob;
 const WriteFilePromise = write_file.WriteFilePromise;
 const WriteFileWaitFromLockedValueTask = write_file.WriteFileWaitFromLockedValueTask;
 const NewReadFileHandler = read_file.NewReadFileHandler;
+const permissions = @import("../../permissions.zig");
