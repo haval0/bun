@@ -1473,8 +1473,9 @@ pub fn writeFileInternal(globalThis: *JSC.JSGlobalObject, path_or_blob_: *PathOr
 
 /// `Bun.write(destination, input, options?)`
 pub fn writeFile(globalThis: *JSC.JSGlobalObject, callframe: *JSC.CallFrame) bun.JSError!JSC.JSValue {
+    const vm = globalThis.bunVM();
     const arguments = callframe.arguments();
-    var args = JSC.CallFrame.ArgumentsSlice.init(globalThis.bunVM(), arguments);
+    var args = JSC.CallFrame.ArgumentsSlice.init(vm, arguments);
     defer args.deinit();
 
     // accept a path or a blob
@@ -1494,7 +1495,7 @@ pub fn writeFile(globalThis: *JSC.JSGlobalObject, callframe: *JSC.CallFrame) bun
         }
     } else {
         // Raw path, check permissions
-        if (!permissions.checkFilePermission(path_or_blob.path.path.slice_with_underlying_string)) {
+        if (!vm.permissions.checkFilePermission(path_or_blob.path.path.slice_with_underlying_string)) {
             return globalThis.throw("No permission to write to path {}", .{path_or_blob.path.path.slice_with_underlying_string});
         }
     }
@@ -1850,7 +1851,7 @@ pub fn constructBunFile(
 
     if (path == .path) {
         // Check path permission
-        if (!permissions.checkFilePermission(path.path.slice_with_underlying_string)) {
+        if (!vm.permissions.checkFilePermission(path.path.slice_with_underlying_string)) {
             return globalObject.throw("No permission to use file at path {}", .{path.path.slice_with_underlying_string});
         }
         if (strings.hasPrefixComptime(path.path.slice(), "s3://")) {
@@ -4752,4 +4753,3 @@ const PathOrBlob = JSC.Node.PathOrBlob;
 const WriteFilePromise = write_file.WriteFilePromise;
 const WriteFileWaitFromLockedValueTask = write_file.WriteFileWaitFromLockedValueTask;
 const NewReadFileHandler = read_file.NewReadFileHandler;
-const permissions = @import("../../permissions.zig");

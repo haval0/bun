@@ -191,6 +191,7 @@ pub const Run = struct {
                     .smol = ctx.runtime_options.smol,
                     .eval = ctx.runtime_options.eval.eval_and_print,
                     .debugger = ctx.runtime_options.debugger,
+                    .permissions = ctx.permissions,
                     .dns_result_order = DNSResolver.Order.fromStringOrDie(ctx.runtime_options.dns_result_order),
                     .is_main_thread = true,
                     .destruct_main_thread_on_exit = bun.getRuntimeFeatureFlag(.BUN_DESTRUCT_VM_ON_EXIT),

@@ -240,6 +240,7 @@ pub const Arguments = struct {
     };
 
     const auto_or_run_params = [_]ParamType{
+        clap.parseParam("--allow-fs <STR>...               Allow fs access within path") catch unreachable,
         clap.parseParam("-F, --filter <STR>...             Run a script in all workspace packages matching the pattern") catch unreachable,
         clap.parseParam("-b, --bun                         Force a script or package to use Bun's runtime instead of Node.js (via symlinking node)") catch unreachable,
         clap.parseParam("--shell <STR>                     Control the shell used for package.json scripts. Supports either 'bun' or 'system'") catch unreachable,
@@ -507,6 +508,8 @@ pub const Arguments = struct {
         }
 
         if (cmd == .RunCommand or cmd == .AutoCommand) {
+            ctx.permissions.allow_fs = args.options("--allow-fs");
+
             ctx.filters = args.options("--filter");
 
             if (args.option("--elide-lines")) |elide_lines| {
@@ -1554,6 +1557,8 @@ pub const Command = struct {
 
     pub const init = ContextData.create;
 
+    const Permissions = @import("permissions.zig");
+
     pub const ContextData = struct {
         start_time: i128,
         args: Api.TransformOptions,
@@ -1567,6 +1572,8 @@ pub const Command = struct {
         test_options: TestOptions = .{},
         bundler_options: BundlerOptions = .{},
         runtime_options: RuntimeOptions = .{},
+
+        permissions: Permissions = .{},
 
         filters: []const []const u8 = &.{},
 

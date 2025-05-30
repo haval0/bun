@@ -20,6 +20,8 @@ comptime {
     @export(&allowAddons, .{ .name = "Bun__VM__allowAddons" });
 }
 
+const Permissions = @import("../permissions.zig");
+
 global: *JSGlobalObject,
 allocator: std.mem.Allocator,
 has_loaded_constructors: bool = false,
@@ -43,6 +45,8 @@ standalone_module_graph: ?*bun.StandaloneModuleGraph = null,
 smol: bool = false,
 dns_result_order: DNSResolver.Order = .verbatim,
 counters: Counters = .{},
+
+permissions: Permissions = .{},
 
 hot_reload: bun.CLI.Command.HotReload = .none,
 jsc: *VM = undefined,
@@ -924,6 +928,8 @@ pub const Options = struct {
     smol: bool = false,
     dns_result_order: DNSResolver.Order = .verbatim,
 
+    permissions: Permissions = .{},
+
     // --print needs the result from evaluating the main module
     eval: bool = false,
 
@@ -970,6 +976,8 @@ pub fn init(opts: Options) !*VirtualMachine {
         .transpiler = transpiler,
         .console = console,
         .log = log,
+
+        .permissions = opts.permissions,
 
         .timer = bun.api.Timer.All.init(),
 
