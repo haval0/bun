@@ -6,13 +6,19 @@ const Permissions = @This();
 allow_fs: []const []const u8 = &[_][]const u8{},
 allow_run: []const []const u8 = &[_][]const u8{},
 
-pub fn checkFilePermission(this: *Permissions, path: bun.SliceWithUnderlyingString) bool {
-    std.debug.print("perms: {s}", .{this.allow_fs[0]});
-    // This if check is just bs for now, rewrite to be useful pls
-    if (path.slice().len == path.slice().len) {
-        return false;
+fn realpath(cwd: []const u8, path: []const u8) []const u8 {
+    return if (std.fs.path.isAbsolute(path)) path else bun.path.join(&[_][]const u8{ cwd, path }, .auto);
+}
+
+pub fn checkFilePermission(this: *Permissions, cwd: []const u8, path: bun.SliceWithUnderlyingString) bool {
+    for (this.allow_fs) |e| {
+        // isParentOrEqual does not work with `/` as the parent
+        switch (bun.path.isParentOrEqual(realpath(cwd, e), realpath(cwd, path.slice()))) {
+            .parent, .equal => return true,
+            else => {},
+        }
     }
-    return true;
+    return false;
 }
 
 pub fn checkRunPermission(this: *Permissions, argv0: [*:0]const u8) bool {
