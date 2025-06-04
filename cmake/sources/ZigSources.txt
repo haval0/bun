@@ -499,6 +499,7 @@ src/output.zig
 src/OutputFile.zig
 src/patch.zig
 src/perf.zig
+src/permissions.zig
 src/pool.zig
 src/Progress.zig
 src/ptr.zig
