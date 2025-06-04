@@ -2135,6 +2135,14 @@ pub fn spawnMaybeSync(
         }
     }
 
+    // argv0 calculation is regression prone. Duplicated in bun.spawn.spawnProcess
+    // TODO: Store argv0 in a predictible place or make a unit test to catch regressions
+    // for exec/shell=true this will be sh/cmd.exe etc. See child_process.ts:927 for details
+    const argv0_ = argv0 orelse argv.items[0].?;
+    if (!jsc_vm.permissions.checkRunPermission(argv0_)) {
+        return globalThis.throw("No permission to run command {s}", .{argv0_});
+    }
+
     log("spawn maxBuffer: {?d}", .{maxBuffer});
 
     if (!override_env and env_array.items.len == 0) {
