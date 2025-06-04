@@ -1495,8 +1495,8 @@ pub fn writeFile(globalThis: *JSC.JSGlobalObject, callframe: *JSC.CallFrame) bun
         }
     } else {
         // Raw path, check permissions
-        if (!vm.permissions.checkFilePermission(vm.transpiler.fs.top_level_dir, path_or_blob.path.path.slice_with_underlying_string)) {
-            return globalThis.throw("No permission to write to path {}", .{path_or_blob.path.path.slice_with_underlying_string});
+        if (!vm.permissions.checkFilePermission(vm.transpiler.fs.top_level_dir, path_or_blob.path.path.slice())) {
+            return globalThis.throw("No permission to write to path {s}", .{path_or_blob.path.path.slice()});
         }
     }
 
@@ -1851,8 +1851,8 @@ pub fn constructBunFile(
 
     if (path == .path) {
         // Check path permission
-        if (!vm.permissions.checkFilePermission(vm.transpiler.fs.top_level_dir, path.path.slice_with_underlying_string)) {
-            return globalObject.throw("No permission to use file at path {}", .{path.path.slice_with_underlying_string});
+        if (!vm.permissions.checkFilePermission(vm.transpiler.fs.top_level_dir, path.path.slice())) {
+            return globalObject.throw("No permission to use file at path {s}", .{path.path.slice()});
         }
         if (strings.hasPrefixComptime(path.path.slice(), "s3://")) {
             return try S3File.constructInternalJS(globalObject, path.path, options);
