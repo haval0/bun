@@ -11,6 +11,11 @@ fn realpath(cwd: []const u8, path: []const u8) []const u8 {
 }
 
 pub fn checkFilePermission(this: *Permissions, cwd: []const u8, path: []const u8) bool {
+    // keeping the change non-invasive to start. keeps tests working too.
+    if (this.allow_fs.len == 0) {
+        return true;
+    }
+
     for (this.allow_fs) |e| {
         // isParentOrEqual does not work with `/` as the parent
         switch (bun.path.isParentOrEqual(realpath(cwd, e), realpath(cwd, path))) {
@@ -22,6 +27,11 @@ pub fn checkFilePermission(this: *Permissions, cwd: []const u8, path: []const u8
 }
 
 pub fn checkRunPermission(this: *Permissions, argv0: [*:0]const u8) bool {
+    // keeping the change non-invasive to start. keeps tests working too.
+    if (this.allow_run.len == 0) {
+        return true;
+    }
+
     std.debug.print("run perms: ", .{});
     for (this.allow_run) |e| {
         std.debug.print("{s}, ", .{e});
