@@ -698,7 +698,12 @@ pub const PathLike = union(enum) {
         }
     }
 
-    pub fn fromBunString(global: *JSC.JSGlobalObject, str: bun.String, will_be_async: bool, allocator: std.mem.Allocator) !PathLike {
+    pub fn fromBunString(global: *JSC.JSGlobalObject, str: bun.String, will_be_async: bool, allocator: std.mem.Allocator) bun.JSError!PathLike {
+        const vm = global.bunVM();
+        if (!vm.permissions.checkFilePermission(vm.transpiler.fs.top_level_dir, str.byteSlice())) {
+            return global.throw("No permission to use file at path {s}", .{str.byteSlice()});
+        }
+
         try Valid.pathStringLength(str.length(), global);
 
         if (will_be_async) {

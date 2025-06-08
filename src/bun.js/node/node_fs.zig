@@ -2694,11 +2694,6 @@ pub const Arguments = struct {
             };
             errdefer path.deinit();
 
-            const vm = ctx.bunVM();
-            if (!vm.permissions.checkFilePermission(vm.transpiler.fs.top_level_dir, path.path.slice())) {
-                return ctx.throw("No permission to read from path {s}", .{path.path.slice()});
-            }
-
             var encoding = Encoding.buffer;
             var flag = FileSystemFlags.r;
 
