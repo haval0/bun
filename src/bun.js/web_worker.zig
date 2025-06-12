@@ -341,6 +341,8 @@ pub fn start(
     const loader = try vm.allocator.create(bun.DotEnv.Loader);
     loader.* = bun.DotEnv.Loader.init(map, vm.allocator);
 
+    vm.permissions = this.parent.permissions;
+
     vm.transpiler.env = loader;
 
     vm.loadExtraEnvAndSourceCodePrinter();
